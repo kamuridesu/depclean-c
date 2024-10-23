@@ -3,15 +3,9 @@
 #include <pthread.h>
 #include <unistd.h>
 
-typedef struct InfiniteProgress {
-    int size;
-    int direction;
-    int position;
-    int finish;
-    pthread_mutex_t mu;
-} InfiniteProgress;
+#include "inf_progress.h"
 
-InfiniteProgress newInfiniteProgress() {
+InfiniteProgress init_infinite_progress() {
     InfiniteProgress infiniteProgress;
     infiniteProgress.direction = 1;
     infiniteProgress.size = 40;
@@ -21,7 +15,10 @@ InfiniteProgress newInfiniteProgress() {
     return infiniteProgress;
 }
 
-void updateInfiniteProgress(InfiniteProgress* ip) {
+infinite_progress_error_e update_infinite_progress(InfiniteProgress *ip) {
+    if (ip->finish == 1) {
+        return INFINITE_PROGRESS_FINISHED;
+    }
     printf("\r");
     printf("[");
     for (int i = 0; i < ip->position; i++) {
@@ -32,47 +29,59 @@ void updateInfiniteProgress(InfiniteProgress* ip) {
         printf("-");
     }
     printf("]");
+    fflush(stdout);
     ip->position += ip->direction;
     if (ip->position > ip->size || ip->position <= 0) {
         ip->direction *= -1;
     }
+    return INFINITE_PROGRESS_OK;
 }
 
-void endInfiniteProgress(InfiniteProgress* ip) {
+infinite_progress_error_e end_infinite_progress(InfiniteProgress *ip) {
+    if (ip->finish == 1) {
+        return INFINITE_PROGRESS_FINISHED;
+    }
     pthread_mutex_lock(&ip->mu);
     ip->finish = 1;
     printf("\n");
+    fflush(stdout);
     pthread_mutex_unlock(&ip->mu);
     pthread_mutex_destroy(&ip->mu);
+    return INFINITE_PROGRESS_OK;
 }
 
-void startInfiniteProgress(InfiniteProgress *ip) {
+infinite_progress_error_e start_infinite_progress(InfiniteProgress *ip) {
+    if (ip->finish == 1) {
+        return INFINITE_PROGRESS_FINISHED;
+    }
     while (ip->finish != 1) {
         pthread_mutex_lock(&ip->mu);
-        updateInfiniteProgress(ip);
+        update_infinite_progress(ip);
         pthread_mutex_unlock(&ip->mu);
-        usleep(1000);
+        usleep(10000);
     }
+    return INFINITE_PROGRESS_OK;
 }
 
-void* startInfiniteThread(void* param) {
+void* start_infinite_thread(void *param) {
     InfiniteProgress* ip = (InfiniteProgress*)param;
-    startInfiniteProgress(ip);
+    start_infinite_progress(ip);
     return 0;
 }
 
-int main(int argc, char** argv) {
-    InfiniteProgress ip = newInfiniteProgress();
-    pthread_t inf_thread;
-    pthread_create(&inf_thread, NULL, startInfiniteThread, &ip);
+// int main(int argc, char **argv) {
+//     InfiniteProgress ip = init_infinite_progress();
+//     pthread_t inf_thread;
+//     pthread_create(&inf_thread, NULL, start_infinite_thread, &ip);
     
-    int counter = 0;
-    while (1) {
-        counter++;
-        if (counter > 500) {
-            endInfiniteProgress(&ip);
-        }
-        usleep(1000);
-    }
-    pthread_join(inf_thread, NULL);
-}
+//     int counter = 0;
+//     while (1) {
+//         counter++;
+//         if (counter > 500) {
+//             end_infinite_progress(&ip);
+//             break;
+//         }
+//         usleep(10000);
+//     }
+//     pthread_join(inf_thread, NULL);
+// }

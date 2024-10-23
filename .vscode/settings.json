@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "*.css": "css",
+        "stdio.h": "c",
+        "array": "c",
+        "string_view": "c",
+        "initializer_list": "c",
+        "utility": "c",
+        "list": "c"
+    }
+}
