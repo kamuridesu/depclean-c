@@ -34,7 +34,7 @@ void end_progress(Progress *p) {
     for (int i = 0; i < 40 - p->status; i++) {
         printf("#");
     }
-    printf("]");
+    printf("]\n");
     fflush(stdout);
     p->status = 0;
 }

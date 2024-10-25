@@ -33,6 +33,24 @@ char_list_errors_e free_char_list(CharList *list) {
     return CHAR_LIST_OK;
 }
 
+char_list_errors_e remove_from_list(CharList *list, int index) {
+    if (index > list->size || index < 0) {
+        return CHAR_LIST_OUT_OF_BOUNDS;
+    }
+    free(list->content[index]);
+    for (int i = index; i < list->size - 1; i++) {
+        list->content[i] = list->content[i + 1];
+    }
+    list->size--;
+    return CHAR_LIST_OK;
+}
+
+void print_list(CharList *list) {
+    for (int i = 0; i < list->size; i++) {
+        printf("%s\n", list->content[i]);
+    }
+}
+
 // int main(int argc, char **argv) {
 //     CharList *list = init_char_list();
 //     add_to_list(list, "tsert");
@@ -41,7 +59,10 @@ char_list_errors_e free_char_list(CharList *list) {
 //     for (int i = 0; i < list->size; i++) {
 //         printf("%s\n", list->content[i]);
 //     }
-
+//     remove_from_list(list, 0);
+//     for (int i = 0; i < list->size; i++) {
+//         printf("%s\n", list->content[i]);
+//     }
 //     free_char_list(list);
 //     return 0;
 // }

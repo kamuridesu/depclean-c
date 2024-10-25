@@ -34,6 +34,7 @@ int get_path_total_size(const char *root, CharList *folder_list, CharList *file_
 
         if (lstat(path, &file_stat) == 0) {
             if (S_ISLNK(file_stat.st_mode)) {
+                add_to_list(file_list, path);
                 continue;
             }
             if (S_ISDIR(file_stat.st_mode)) {
@@ -94,19 +95,29 @@ int walk_dir(const char *root, CharList *folder_list, CharList *file_list) {
     return total_size;
 }
 
+void delete_all_dirs(int total, int current, CharList *folder_list, Progress *prog) {
+    while (folder_list->size > 0) {
+        for (int i = 0; i < folder_list->size; i++) {
+            int success = rmdir(folder_list->content[i]);
+            if (success == 0) {
+                current++;
+                update_progress(prog, total, current);
+                remove_from_list(folder_list, i);
+            }
+        }
+    }
+}
+
 void delete_all(CharList *folder_list, CharList *file_list, Progress *prog) {
     int total_len = folder_list->size + file_list->size;
+    if (total_len < 1) return;
     int current_len = 0;
     for (int i = 0; i < file_list->size; i++) {
         update_progress(prog, total_len, current_len);
         unlink(file_list->content[i]);
         current_len++;
     }
-    for (int i = 0; i < folder_list->size; i++) {
-        update_progress(prog, total_len, current_len);
-        rmdir(folder_list->content[i]);
-        current_len++;
-    }
+    delete_all_dirs(total_len, current_len, folder_list, prog);
     update_progress(prog, total_len, total_len);
 }
 

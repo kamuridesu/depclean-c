@@ -37,6 +37,11 @@ int main(int argc, char **argv) {
     end_infinite_progress(&inf_prog);
     pthread_join(inf_thread, NULL);
 
+    if (total_size < 1) {
+        printf("No files or folders found.\n");
+        return 0;
+    }
+
     for (int i = 0; i < file_list->size; i++) {
         printf("%s\n", file_list->content[i]);
     }

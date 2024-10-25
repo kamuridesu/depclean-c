@@ -6,6 +6,7 @@
         "string_view": "c",
         "initializer_list": "c",
         "utility": "c",
-        "list": "c"
+        "list": "c",
+        "random": "c"
     }
 }

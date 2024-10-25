@@ -64,8 +64,7 @@ infinite_progress_error_e start_infinite_progress(InfiniteProgress *ip) {
 }
 
 void* start_infinite_thread(void *param) {
-    InfiniteProgress* ip = (InfiniteProgress*)param;
-    start_infinite_progress(ip);
+    start_infinite_progress((InfiniteProgress*)param);
     return 0;
 }
 

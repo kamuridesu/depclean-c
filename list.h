@@ -17,6 +17,6 @@ typedef struct CharList {
 CharList* init_char_list();
 char_list_errors_e add_to_list(CharList *list, const char *item);
 char_list_errors_e free_char_list(CharList *list);
-
+char_list_errors_e remove_from_list(CharList *list, int index);
 
 #endif
