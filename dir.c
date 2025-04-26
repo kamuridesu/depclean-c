@@ -48,9 +48,8 @@ int get_path_total_size(const char *root, CharList *folder_list, CharList *file_
             perror("stat");
         }
     }
-
+    closedir(dir);
     return size;
-
 }
 
 int walk_dir(const char *root, CharList *folder_list, CharList *file_list) {
