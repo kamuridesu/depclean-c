@@ -7,12 +7,12 @@
 #include "inf_progress.h"
 #include "dir.h"
 
-char* format_size(int number) {
+char* format_size(float number) {
     char *units[8] = {"", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"};
     float n = number;
     char *buffer = (char*)malloc(100 * sizeof(char));
     for (int i = 0; i < 8; i++) {
-        if (abs(n) < 1024) {
+        if (fabsf(n) < 1024.0) {
             snprintf(buffer, 100, "%.1f%sB", n, units[i]);
             return buffer;
         }
@@ -23,7 +23,6 @@ char* format_size(int number) {
 }
 
 int string__length(char *string) {
-    char c = string[0];
     int counter = 0;
     while (string[counter] != '\0') {
         counter++;
