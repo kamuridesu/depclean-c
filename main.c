@@ -22,18 +22,38 @@ char* format_size(int number) {
     return buffer;
 }
 
+int string__length(char *string) {
+    char c = string[0];
+    int counter = 0;
+    while (string[counter] != '\0') {
+        counter++;
+    }
+    return counter;
+}
+
+char *string__stripLastChar(char *string, char sep) {
+    int len = string__length(string);
+    if (string[len - 1] == sep) {
+        string[len - 1] = '\0';
+    }
+    return string;
+}
+
 int main(int argc, char **argv) {
     if (argc < 2) {
         fprintf(stderr, "Usage: %s <directory_path>\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
+    char *root_folder = argv[1];
+    root_folder = string__stripLastChar(root_folder, '/');
+
     InfiniteProgress inf_prog = init_infinite_progress();
     pthread_t inf_thread;
     pthread_create(&inf_thread, NULL, start_infinite_thread, &inf_prog);
     CharList *folder_list = init_char_list();
     CharList *file_list = init_char_list();
-    int total_size = walk_dir(argv[1], folder_list, file_list);
+    int total_size = walk_dir(root_folder, folder_list, file_list);
     end_infinite_progress(&inf_prog);
     pthread_join(inf_thread, NULL);
 
