@@ -2,18 +2,9 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <pthread.h>
 
 #include "inf_progress.h"
-
-InfiniteProgress init_infinite_progress() {
-    InfiniteProgress infiniteProgress;
-    infiniteProgress.direction = 1;
-    infiniteProgress.size = 40;
-    infiniteProgress.finish = 0;
-    infiniteProgress.position = 0;
-    pthread_mutex_init(&infiniteProgress.mu, NULL);
-    return infiniteProgress;
-}
 
 infinite_progress_error_e update_infinite_progress(InfiniteProgress *ip) {
     if (ip->finish == 1) {
@@ -47,10 +38,11 @@ infinite_progress_error_e end_infinite_progress(InfiniteProgress *ip) {
     fflush(stdout);
     pthread_mutex_unlock(&ip->mu);
     pthread_mutex_destroy(&ip->mu);
+    pthread_join(ip->thread, NULL);
     return INFINITE_PROGRESS_OK;
 }
 
-infinite_progress_error_e start_infinite_progress(InfiniteProgress *ip) {
+infinite_progress_error_e __run_infinite_progress(InfiniteProgress *ip) {
     if (ip->finish == 1) {
         return INFINITE_PROGRESS_FINISHED;
     }
@@ -63,11 +55,24 @@ infinite_progress_error_e start_infinite_progress(InfiniteProgress *ip) {
     return INFINITE_PROGRESS_OK;
 }
 
-void* start_infinite_thread(void *param) {
-    start_infinite_progress((InfiniteProgress*)param);
+void* __start_infinite_thread(void *param) { 
+    __run_infinite_progress((InfiniteProgress*)param);
     return 0;
 }
 
+void start_infinite_progress(InfiniteProgress *ip) {
+    pthread_create(&ip->thread, NULL, __start_infinite_thread, ip);
+}
+
+InfiniteProgress init_infinite_progress() {
+    InfiniteProgress infiniteProgress;
+    infiniteProgress.direction = 1;
+    infiniteProgress.size = 40;
+    infiniteProgress.finish = 0;
+    infiniteProgress.position = 0;
+    pthread_mutex_init(&infiniteProgress.mu, NULL);
+    return infiniteProgress;
+}
 // int main(int argc, char **argv) {
 //     InfiniteProgress ip = init_infinite_progress();
 //     pthread_t inf_thread;

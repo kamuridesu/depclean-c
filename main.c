@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
-#include <pthread.h>
 
 #include "progress.h"
 #include "inf_progress.h"
@@ -48,22 +47,19 @@ int main(int argc, char **argv) {
     root_folder = string__stripLastChar(root_folder, '/');
 
     InfiniteProgress inf_prog = init_infinite_progress();
-    pthread_t inf_thread;
-    pthread_create(&inf_thread, NULL, start_infinite_thread, &inf_prog);
+
+    start_infinite_progress(&inf_prog);
     CharList *folder_list = init_char_list();
     CharList *file_list = init_char_list();
     int total_size = walk_dir(root_folder, folder_list, file_list);
     end_infinite_progress(&inf_prog);
-    pthread_join(inf_thread, NULL);
 
     if (total_size < 1) {
         printf("No files or folders found.\n");
         return 0;
     }
 
-    for (int i = 0; i < file_list->size; i++) {
-        printf("%s\n", file_list->content[i]);
-    }
+    print_list(file_list);
 
     char* human_total_size = format_size(total_size);
     printf("%s will be freed, continue? [y/N]: ", human_total_size);
